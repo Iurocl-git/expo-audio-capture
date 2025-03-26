@@ -1,0 +1,60 @@
+{
+  "name": "expo-audio-capture",
+  "version": "1.0.0",
+  "description": "Native Expo module for capturing system audio using MediaProjection and sending FFT data via UDP.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-audio-capture",
+    "media-projection",
+    "audio",
+    "fft",
+    "udp",
+    "native-module",
+    "audio-visualizer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Iurocl-git/expo-audio-capture"
+  },
+  "bugs": {
+    "url": "https://github.com/Iurocl-git/expo-audio-capture/issues"
+  },
+  "author": "Ioan Motrescu <motrescuioan@gmail.com> (https://github.com/Iurocl-git)",
+  "license": "MIT",
+  "homepage": "https://github.com/Iurocl-git/expo-audio-capture#readme",
+  "files": [
+    "android",
+    "ios",
+    "build",
+    "src",
+    "expo-module.config.json"
+  ],
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module",
+    "open:ios": "xed example/ios",
+    "open:android": "open -a \"Android Studio\" example/android"
+  },
+  "dependencies": {
+    "expo-modules-core": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "expo": "~52.0.0",
+    "expo-module-scripts": "^4.0.3",
+    "react-native": "0.76.0"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}
