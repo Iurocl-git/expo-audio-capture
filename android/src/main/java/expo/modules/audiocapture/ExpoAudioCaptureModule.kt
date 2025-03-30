@@ -172,6 +172,16 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       activity.startActivityForResult(captureIntent, SCREEN_CAPTURE_REQUEST_CODE)
     }
 
+    Function("setNormalizationMode") { mode: String ->
+      val selected = NormalizationMode.fromValue(mode)
+      if (selected != null) {
+        setNormalizationMode(selected)
+      } else {
+        Log.e("AudioCapture", "Unknown normalization mode: $mode")
+        throw IllegalArgumentException("Unknown normalization mode: $mode")
+      }
+    }
+
     Function("stopCapture") {
       Log.d("AudioCapture", "Stopping capture")
       isRecording = false
@@ -193,16 +203,6 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       } catch (e: Exception) {
         Log.e("AudioCapture", "Error stopping capture", e)
       }
-    }
-  }
-
-  Function("setNormalizationMode") { mode: String ->
-    val selected = NormalizationMode.fromValue(mode)
-    if (selected != null) {
-      setNormalizationMode(selected)
-    } else {
-      Log.e("AudioCapture", "Unknown normalization mode: $mode")
-      throw IllegalArgumentException("Unknown normalization mode: $mode")
     }
   }
 
