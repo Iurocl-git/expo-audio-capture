@@ -444,7 +444,7 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
 
   private val recentLogPeaks = mutableListOf<Double>()
 
-  private fun logAdaptiveNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
+  private fun logNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
     val total = low + mid + high
     recentLogPeaks.add(total)
     if (recentLogPeaks.size > 50) recentLogPeaks.removeAt(0)
@@ -463,9 +463,6 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       logNorm(high)
     )
   }
-
-
-
 
 
   // Пример простой адаптивной нормализации (с усреднением)
