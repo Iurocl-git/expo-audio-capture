@@ -438,21 +438,24 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
     return Triple(
       (low / 230 / (94654 / 4095)).coerceAtMost(4095.0).toInt(),
       (mid / 1750 / (12427 / 4095)).coerceAtMost(4095.0).toInt(),
-      (high / 18000 / (1351 / 4095)).coerceAtMost(4095.0).toInt()
+      (high / 18000 / (13510 / 4095)).coerceAtMost(4095.0).toInt()
     )
   }
 
   private fun logNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
-    fun scale(value: Double): Int {
-      return ((Math.log10(value + 1) / 5.0) * 4095).coerceAtMost(4095.0).toInt()
+    fun logNorm(value: Double, maxRef: Double): Int {
+      val log = Math.log10(value + 1)
+      val maxLog = Math.log10(maxRef + 1)
+      return ((log / maxLog) * 4095).coerceAtMost(4095.0).toInt()
     }
 
     return Triple(
-      scale(low),
-      scale(mid),
-      scale(high)
+      logNorm(low, 300.0),
+      logNorm(mid, 2000.0),
+      logNorm(high, 10000.0)
     )
   }
+
 
 
 
