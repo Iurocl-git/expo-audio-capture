@@ -34,6 +34,8 @@ private inline fun <reified T> Intent.getParcelableExtraCompat(key: String): T? 
     }
 }
 
+typealias NormalizationFunction = (low: Double, mid: Double, high: Double) -> Triple<Int, Int, Int>
+
 @RequiresApi(Build.VERSION_CODES.Q)
 class ExpoAudioCaptureModule : Module(), ActivityEventListener {
 
@@ -50,7 +52,6 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
   private var isReceiverRegistered = false
 
   private val SCREEN_CAPTURE_REQUEST_CODE = 1001
-  typealias NormalizationFunction = (low: Double, mid: Double, high: Double) -> Triple<Int, Int, Int>
   private var normalizationFunction: NormalizationFunction = ::defaultNormalization
 
   enum class NormalizationMode(val value: String) {
