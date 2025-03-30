@@ -473,7 +473,7 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       NormalizationMode.ADAPTIVE -> ::adaptiveNormalization
     }
     Log.d("AudioCapture", "Normalization mode set to: ${mode.name}")
-  }}
+  }
 
   private fun performFHT(data: DoubleArray) {
     val n = data.size
