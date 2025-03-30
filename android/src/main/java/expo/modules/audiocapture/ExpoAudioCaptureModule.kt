@@ -438,17 +438,23 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
     return Triple(
       (low / 230 / (94654 / 4095)).coerceAtMost(4095.0).toInt(),
       (mid / 1750 / (12427 / 4095)).coerceAtMost(4095.0).toInt(),
-      (high / 18000 / (1051 / 4095)).coerceAtMost(4095.0).toInt()
+      (high / 18000 / (1351 / 4095)).coerceAtMost(4095.0).toInt()
     )
   }
 
   private fun logNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
+    fun scale(value: Double): Int {
+      return ((Math.log10(value + 1) / 5.0) * 4095).coerceAtMost(4095.0).toInt()
+    }
+
     return Triple(
-      (Math.log10(low + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt(),
-      (Math.log10(mid + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt(),
-      (Math.log10(high + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt()
+      scale(low),
+      scale(mid),
+      scale(high)
     )
   }
+
+
 
   // Пример простой адаптивной нормализации (с усреднением)
   private var recentPeaks = mutableListOf<Double>()
