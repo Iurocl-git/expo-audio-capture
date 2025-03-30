@@ -50,6 +50,20 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
   private var isReceiverRegistered = false
 
   private val SCREEN_CAPTURE_REQUEST_CODE = 1001
+  typealias NormalizationFunction = (low: Double, mid: Double, high: Double) -> Triple<Int, Int, Int>
+  private var normalizationFunction: NormalizationFunction = ::defaultNormalization
+
+  enum class NormalizationMode(val value: String) {
+    DEFAULT("default"),
+    LOG("log"),
+    ADAPTIVE("adaptive");
+
+    companion object {
+      fun fromValue(value: String): NormalizationMode? {
+        return values().find { it.value.equals(value, ignoreCase = true) }
+      }
+    }
+  }
 
   @RequiresApi(Build.VERSION_CODES.TIRAMISU)
   override fun definition() = ModuleDefinition {
@@ -179,6 +193,16 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       } catch (e: Exception) {
         Log.e("AudioCapture", "Error stopping capture", e)
       }
+    }
+  }
+
+  Function("setNormalizationMode") { mode: String ->
+    val selected = NormalizationMode.fromValue(mode)
+    if (selected != null) {
+      setNormalizationMode(selected)
+    } else {
+      Log.e("AudioCapture", "Unknown normalization mode: $mode")
+      throw IllegalArgumentException("Unknown normalization mode: $mode")
     }
   }
 
@@ -359,9 +383,9 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
                   }
                 }
 
-                val normLow = (lowSum / 230 / 64654 * 255).coerceAtMost(255.0).toInt()
-                val normMid = (midSum / 1750 / 8427 * 255).coerceAtMost(255.0).toInt()
-                val normHigh = (highSum / 18000 / 1351 * 255).coerceAtMost(255.0).toInt()
+
+
+                val (normLow, normMid, normHigh) = normalizationFunction(lowSum, midSum, highSum)
 
                 val data = mapOf("low" to normLow, "mid" to normMid, "high" to normHigh)
                 sendEvent("onFftData", data)
@@ -408,6 +432,47 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
       Log.e("AudioCapture", "Error stopping recording", e)
     }
   }
+
+  private fun defaultNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
+    return Triple(
+      (low / 230 / (94654 / 4095)).coerceAtMost(4095.0).toInt(),
+      (mid / 1750 / (12427 / 4095)).coerceAtMost(4095.0).toInt(),
+      (high / 18000 / (1051 / 4095)).coerceAtMost(4095.0).toInt()
+    )
+  }
+
+  private fun logNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
+    return Triple(
+      (Math.log10(low + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt(),
+      (Math.log10(mid + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt(),
+      (Math.log10(high + 1) / Math.log10(1000.0) * 4095).coerceAtMost(4095.0).toInt()
+    )
+  }
+
+  // Пример простой адаптивной нормализации (с усреднением)
+  private var recentPeaks = mutableListOf<Double>()
+
+  private fun adaptiveNormalization(low: Double, mid: Double, high: Double): Triple<Int, Int, Int> {
+    val total = low + mid + high
+    recentPeaks.add(total)
+    if (recentPeaks.size > 50) recentPeaks.removeAt(0)
+    val dynamicMax = recentPeaks.maxOrNull()?.takeIf { it > 0 } ?: 1.0
+
+    return Triple(
+      (low / dynamicMax * 4095).coerceAtMost(4095.0).toInt(),
+      (mid / dynamicMax * 4095).coerceAtMost(4095.0).toInt(),
+      (high / dynamicMax * 4095).coerceAtMost(4095.0).toInt()
+    )
+  }
+
+  fun setNormalizationMode(mode: NormalizationMode) {
+    normalizationFunction = when (mode) {
+      NormalizationMode.DEFAULT -> ::defaultNormalization
+      NormalizationMode.LOG -> ::logNormalization
+      NormalizationMode.ADAPTIVE -> ::adaptiveNormalization
+    }
+    Log.d("AudioCapture", "Normalization mode set to: ${mode.name}")
+  }}
 
   private fun performFHT(data: DoubleArray) {
     val n = data.size
