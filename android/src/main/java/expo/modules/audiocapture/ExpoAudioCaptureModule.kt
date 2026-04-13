@@ -208,7 +208,7 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
   }
 
   override fun onActivityResult(
-    activity: Activity?,
+    activity: Activity,
     requestCode: Int,
     resultCode: Int,
     data: Intent?
@@ -288,7 +288,7 @@ class ExpoAudioCaptureModule : Module(), ActivityEventListener {
     }
   }
 
-  override fun onNewIntent(intent: Intent?) {
+  override fun onNewIntent(intent: Intent) {
     // No need to handle
   }
 
